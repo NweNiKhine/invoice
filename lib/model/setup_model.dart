@@ -2,7 +2,12 @@ class StockMaster {
   String code;
   String description;
   double? salePrice;
-  StockMaster({required this.code, required this.description, this.salePrice});
+
+  StockMaster({
+    required this.code,
+    required this.description,
+    this.salePrice,
+  });
 
   Map<String, dynamic> toMap() => {
     'code': code,
@@ -16,6 +21,7 @@ class PurchaseItem {
   int qty;
   double price;
   String description;
+
   PurchaseItem({
     required this.code,
     required this.qty,
@@ -24,6 +30,7 @@ class PurchaseItem {
   });
 
   double get amount => qty * price;
+
   Map<String, dynamic> toMap() => {
     'code': code,
     'qty': qty,

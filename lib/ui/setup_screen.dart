@@ -11,15 +11,15 @@ class SetupScreen extends StatefulWidget {
 class _SetupScreenState extends State<SetupScreen> {
   final codeCtrl = TextEditingController();
   final descCtrl = TextEditingController();
-  final salePriceCtrl=TextEditingController();
+  final salePriceCtrl = TextEditingController();
   bool isEditing = false;
   String? currentDocId;
-  String? originalCode; // Edit လုပ်ချိန်မှာ Code ကို မပြောင်းဘဲ သိမ်းရင် Unique စစ်တာ ကျော်ဖို့
+  String? originalCode;
 
   void _handleSubmit() async {
     String code = codeCtrl.text.trim();
     String desc = descCtrl.text.trim();
-    String salePrice=salePriceCtrl.text.trim();
+    String salePrice = salePriceCtrl.text.trim();
 
     if (code.isEmpty || desc.isEmpty) {
       _showSnackBar("Please fill all fields");
@@ -44,13 +44,17 @@ class _SetupScreenState extends State<SetupScreen> {
       await FirebaseFirestore.instance
           .collection('stocks')
           .doc(currentDocId)
-          .update({'code': code, 'description': desc,'saleprice':salePrice});
+          .update({
+        'code': code,
+        'description': desc,
+        'saleprice': salePrice,
+      });
       _showSnackBar("Stock updated successfully");
     } else {
       await FirebaseFirestore.instance.collection('stocks').add({
         'code': code,
         'description': desc,
-        'saleprice':salePrice ?? "-",
+        'saleprice': salePrice,
         'createdAt': FieldValue.serverTimestamp(),
       });
       _showSnackBar("New stock added");
@@ -78,19 +82,21 @@ class _SetupScreenState extends State<SetupScreen> {
       originalCode = doc['code'];
       codeCtrl.text = doc['code'];
       descCtrl.text = doc['description'];
-      salePriceCtrl.text=doc['saleprice'];
+      salePriceCtrl.text = doc['saleprice'];
     });
   }
 
   void _showSnackBar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Stock Setup", style: TextStyle(color: Colors.white)),
+        title: const Text("Stock Setup",
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.purple,
       ),
       body: Column(
@@ -104,8 +110,12 @@ class _SetupScreenState extends State<SetupScreen> {
                 child: Column(
                   children: [
                     Text(
-                      isEditing ? "Edit Stock" : "Create New Stock",
-                      style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16),
+                      isEditing
+                          ? "Edit Stock"
+                          : "Create New Stock",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
                     ),
                     TextField(
                       controller: codeCtrl,
@@ -125,8 +135,6 @@ class _SetupScreenState extends State<SetupScreen> {
                         labelText: "Sale Price",
                       ),
                     ),
-
-
                     const SizedBox(height: 10),
                     Row(
                       children: [
@@ -134,21 +142,27 @@ class _SetupScreenState extends State<SetupScreen> {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: _clearForm,
-                              child: const Text("Cancel"),
+                              child:
+                              const Text("Cancel"),
                             ),
                           ),
-                        if (isEditing) const SizedBox(width: 10),
+                        if (isEditing)
+                          const SizedBox(width: 10),
                         Expanded(
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
+                            style:
+                            ElevatedButton.styleFrom(
                               backgroundColor: isEditing
                                   ? Colors.orange
                                   : Colors.purple,
                             ),
                             onPressed: _handleSubmit,
                             child: Text(
-                              isEditing ? "Update" : "Save",
-                              style: const TextStyle(color: Colors.white),
+                              isEditing
+                                  ? "Update"
+                                  : "Save",
+                              style: const TextStyle(
+                                  color: Colors.white),
                             ),
                           ),
                         ),
@@ -159,54 +173,48 @@ class _SetupScreenState extends State<SetupScreen> {
               ),
             ),
           ),
-
-          // Table Header
           Container(
             color: Colors.purple[100],
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            padding: const EdgeInsets.symmetric(
+                vertical: 10, horizontal: 16),
             child: Row(
               children: const [
                 Expanded(
                   flex: 2,
                   child: Text(
                     "Stock Code",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   flex: 3,
                   child: Text(
                     "Description",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   flex: 3,
                   child: Text(
                     "Sale Price",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
-                // Expanded(
-                //   flex: 3,
-                //   child: Text(
-                //     "Purchase Price",
-                //     style: TextStyle(fontWeight: FontWeight.bold),
-                //   ),
-                // ),
                 SizedBox(
                   width: 80,
                   child: Text(
                     "Action",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ],
             ),
           ),
-
-          // StreamBuilder with Alphabetical Ordering
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -215,19 +223,27 @@ class _SetupScreenState extends State<SetupScreen> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
+                  return Center(
+                      child:
+                      Text("Error: ${snapshot.error}"));
                 }
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                      child:
+                      CircularProgressIndicator());
                 }
                 return ListView.separated(
-                  itemCount: snapshot.data!.docs.length,
-                  separatorBuilder: (context, index) =>
-                      const Divider(height: 1),
+                  itemCount:
+                  snapshot.data!.docs.length,
+                  separatorBuilder:
+                      (context, index) =>
+                  const Divider(height: 1),
                   itemBuilder: (context, index) {
-                    var data = snapshot.data!.docs[index];
+                    var data =
+                    snapshot.data!.docs[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                      const EdgeInsets.symmetric(
                         vertical: 4.0,
                         horizontal: 16,
                       ),
@@ -237,15 +253,21 @@ class _SetupScreenState extends State<SetupScreen> {
                             flex: 2,
                             child: Text(
                               data['code'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
+                              style:
+                              const TextStyle(
+                                fontWeight:
+                                FontWeight.w500,
                               ),
                             ),
                           ),
-                          Expanded(flex: 3, child: Text(data['description'])),
-                          Expanded(flex: 3, child: Text(data['saleprice'])),
-
-
+                          Expanded(
+                              flex: 3,
+                              child: Text(
+                                  data['description'])),
+                          Expanded(
+                              flex: 3,
+                              child: Text(
+                                  data['saleprice'])),
                           SizedBox(
                             width: 100,
                             child: Row(
@@ -253,18 +275,24 @@ class _SetupScreenState extends State<SetupScreen> {
                                 IconButton(
                                   icon: const Icon(
                                     Icons.edit,
-                                    color: Colors.blue,
+                                    color:
+                                    Colors.blue,
                                     size: 20,
                                   ),
-                                  onPressed: () => _prepareEdit(data),
+                                  onPressed: () =>
+                                      _prepareEdit(
+                                          data),
                                 ),
                                 IconButton(
                                   icon: const Icon(
                                     Icons.delete,
-                                    color: Colors.red,
+                                    color:
+                                    Colors.red,
                                     size: 20,
                                   ),
-                                  onPressed: () => data.reference.delete(),
+                                  onPressed: () =>
+                                      data.reference
+                                          .delete(),
                                 ),
                               ],
                             ),

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../model/setup_model.dart';
 
 class PurchaseEntryScreen extends StatefulWidget {
-  final DocumentSnapshot? editData; // Purchase List မှ ပို့လိုက်သော Data
+  final DocumentSnapshot? editData;
 
   const PurchaseEntryScreen({super.key, this.editData});
 
@@ -21,7 +21,6 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
   @override
   void initState() {
     super.initState();
-    // Edit Mode: Invoice တစ်ခုလုံးကို ပြန်ပြင်ရန် Data ဖြည့်ခြင်း
     if (widget.editData != null) {
       final data = widget.editData!.data() as Map<String, dynamic>;
       invCtrl.text = data['invoiceNo'] ?? "";
@@ -38,9 +37,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
     }
   }
 
-  // Dialog Function: ပစ္စည်းအသစ်ထည့်ရန်နှင့် ရှိပြီးသားကို ပြင်ရန် နှစ်မျိုးလုံးသုံးသည်
   void _showItemDialog({PurchaseItem? item, int? index}) async {
-    // ပစ္စည်းရှိရင် Data ထည့်မယ်၊ မရှိရင် အလွတ်ထားမယ်
     final qtyCtrl = TextEditingController(text: item?.qty.toString() ?? "");
     final priceCtrl = TextEditingController(text: item?.price.toString() ?? "");
     final totalCtrl = TextEditingController(text: item?.amount.toStringAsFixed(2) ?? "0");
@@ -48,7 +45,6 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
     String? tempCode = item?.code;
     String tempDesc = item?.description ?? "";
 
-    // Stock Master မှ Code များကို ယူခြင်း
     var stocksSnap = await FirebaseFirestore.instance.collection('stocks').get();
     Map<String, String> stockMap = {
       for (var d in stocksSnap.docs) d['code']: d['description'],
@@ -74,7 +70,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                     tempDesc = stockMap[val!]!;
                   }),
                 ),
-                SizedBox(height: 12,),
+                const SizedBox(height: 12),
                 Text("Desc: $tempDesc", style: const TextStyle(fontSize: 14, color: Colors.black)),
                 TextField(
                   controller: qtyCtrl,
@@ -90,12 +86,19 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                   onChanged: (_) => totalCtrl.text =
                       ((double.tryParse(qtyCtrl.text) ?? 0) * (double.tryParse(priceCtrl.text) ?? 0)).toStringAsFixed(2),
                 ),
-                TextField(controller: totalCtrl, decoration: const InputDecoration(labelText: "Total"), readOnly: true),
+                TextField(
+                  controller: totalCtrl,
+                  decoration: const InputDecoration(labelText: "Total"),
+                  readOnly: true,
+                ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
             ElevatedButton(
               onPressed: () {
                 if (tempCode == null || qtyCtrl.text.isEmpty) return;
@@ -109,9 +112,9 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                   );
 
                   if (index == null) {
-                    itemList.add(newItem); // Add new item
+                    itemList.add(newItem);
                   } else {
-                    itemList[index] = newItem; // Update existing item
+                    itemList[index] = newItem;
                   }
                 });
                 Navigator.pop(context);
@@ -146,7 +149,10 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
     };
 
     if (widget.editData != null) {
-      await FirebaseFirestore.instance.collection('purchases').doc(widget.editData!.id).update(data);
+      await FirebaseFirestore.instance
+          .collection('purchases')
+          .doc(widget.editData!.id)
+          .update(data);
     } else {
       await FirebaseFirestore.instance.collection('purchases').add(data);
     }
@@ -159,7 +165,12 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
       appBar: AppBar(
         title: Text(widget.editData != null ? "Edit Purchase" : "Purchase Entry"),
         backgroundColor: Colors.purple,
-        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveToFirebase)],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _saveToFirebase,
+          )
+        ],
       ),
       body: Column(
         children: [
@@ -167,73 +178,171 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Row(children: [
-                  Text("Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}", style: const TextStyle(fontSize: 16)),
-                  IconButton(icon: const Icon(Icons.calendar_today, color: Colors.purple), onPressed: () async {
-                    DateTime? p = await showDatePicker(context: context, initialDate: selectedDate, firstDate: DateTime(2000), lastDate: DateTime(2100));
-                    if (p != null) setState(() => selectedDate = p);
-                  }),
-                ]),
-                TextField(controller: invCtrl, decoration: const InputDecoration(labelText: "Invoice No")),
+                Row(
+                  children: [
+                    Text(
+                      "Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.calendar_today, color: Colors.purple),
+                      onPressed: () async {
+                        DateTime? p = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (p != null) {
+                          setState(() => selectedDate = p);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                TextField(
+                  controller: invCtrl,
+                  decoration: const InputDecoration(labelText: "Invoice No"),
+                ),
                 const SizedBox(height: 10),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.add),
                   label: const Text("Add Detail"),
-                  onPressed: () => _showItemDialog(), // ပစ္စည်းအသစ်ထည့်ရန် ခေါ်ခြင်း
+                  onPressed: () => _showItemDialog(),
                 ),
               ],
             ),
           ),
-          // Table Header
           Container(
             color: Colors.purple[50],
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: const Row(children: [
-              SizedBox(width: 40, child: Text("Sr", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 2, child: Text("Code", style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 3, child: Text("Description", style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 1, child: Text("Qty", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 2, child: Text("Amount", textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
-              SizedBox(width: 40), // Delete button space
-            ]),
+            child: const Row(
+              children: [
+                SizedBox(
+                  width: 40,
+                  child: Text(
+                    "Sr",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Code",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    "Description",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    "Qty",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Amount",
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(width: 40),
+              ],
+            ),
           ),
-
           Expanded(
             child: ListView.builder(
               itemCount: itemList.length,
               itemBuilder: (context, index) {
                 final item = itemList[index];
                 return InkWell(
-                  onTap: () => _showItemDialog(item: item, index: index), // Row ကိုနှိပ်ရင် Dialog ဖြင့် ပြန်ပြင်ရန်
+                  onTap: () => _showItemDialog(item: item, index: index),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey, width: 0.2))),
-                    child: Row(children: [
-                      SizedBox(width: 40, child: Text("${index + 1}", textAlign: TextAlign.center)),
-                      Expanded(flex: 2, child: Text(item.code)),
-                      Expanded(flex: 3, child: Text(item.description, overflow: TextOverflow.ellipsis)),
-                      Expanded(flex: 1, child: Text("${item.qty}", textAlign: TextAlign.center)),
-                      Expanded(flex: 2, child: Text(item.amount.toStringAsFixed(0), textAlign: TextAlign.right, style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold))),
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle, color: Colors.red, size: 20),
-                        onPressed: () => setState(() => itemList.removeAt(index)),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey, width: 0.2),
                       ),
-                    ]),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 40,
+                          child: Text(
+                            "${index + 1}",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Expanded(flex: 2, child: Text(item.code)),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            item.description,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            "${item.qty}",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            item.amount.toStringAsFixed(0),
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              color: Colors.purple,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.remove_circle,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                          onPressed: () =>
+                              setState(() => itemList.removeAt(index)),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
             ),
           ),
-          // Total Amount Footer
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.grey[200],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text("Total Amount: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("${itemList.fold(0.0, (sum, item) => sum + item.amount).toStringAsFixed(2)} MMK",
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.purple, fontSize: 16)),
+                const Text(
+                  "Total Amount: ",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "${itemList.fold(0.0, (sum, item) => sum + item.amount).toStringAsFixed(2)} MMK",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple,
+                    fontSize: 16,
+                  ),
+                ),
               ],
             ),
           )

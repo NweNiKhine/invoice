@@ -15,10 +15,8 @@ class Purchase extends StatelessWidget {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-
       body: Column(
         children: [
-          // ===== TABLE HEADER =====
           Container(
             color: Colors.grey.shade300,
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -31,8 +29,6 @@ class Purchase extends StatelessWidget {
               ],
             ),
           ),
-
-          // ===== TABLE BODY =====
           Expanded(
             child: ListView(
               children: const [
@@ -57,8 +53,6 @@ class Purchase extends StatelessWidget {
               ],
             ),
           ),
-
-          // ===== BOTTOM BAR =====
           Container(
             height: 70,
             color: Colors.grey.shade300,
@@ -69,8 +63,6 @@ class Purchase extends StatelessWidget {
                   child: Row(
                     children: [
                       const SizedBox(width: 10),
-
-                      // ✅ NEW BUTTON
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -88,17 +80,13 @@ class Purchase extends StatelessWidget {
                           ],
                         ),
                       ),
-
                       const SizedBox(width: 20),
-
-                      // Edit (future)
                       const Icon(Icons.edit, size: 30),
                       const SizedBox(width: 4),
                       const Text('Edit'),
                     ],
                   ),
                 ),
-
                 const Expanded(
                   flex: 2,
                   child: Text(
@@ -130,7 +118,6 @@ class Purchase extends StatelessWidget {
   }
 }
 
-/* ===== HEADER CELL ===== */
 class _HeaderCell extends StatelessWidget {
   final String text;
   final int flex;
@@ -150,7 +137,6 @@ class _HeaderCell extends StatelessWidget {
   }
 }
 
-/* ===== TABLE ROW ===== */
 class _TableRow extends StatelessWidget {
   final String date;
   final String invoice;
@@ -187,7 +173,8 @@ class _TableRow extends StatelessWidget {
       flex: flex,
       child: Text(
         text,
-        textAlign: rightAlign ? TextAlign.right : TextAlign.center,
+        textAlign:
+        rightAlign ? TextAlign.right : TextAlign.center,
       ),
     );
   }

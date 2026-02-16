@@ -29,10 +29,8 @@ class PurchaseNewPage extends StatelessWidget {
           )
         ],
       ),
-
       body: Column(
         children: [
-          // ===== TOP FORM =====
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -65,7 +63,6 @@ class PurchaseNewPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 Align(
                   alignment: Alignment.centerLeft,
                   child: ElevatedButton(
@@ -79,8 +76,6 @@ class PurchaseNewPage extends StatelessWidget {
               ],
             ),
           ),
-
-          // ===== TABLE HEADER =====
           Container(
             color: Colors.grey.shade400,
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -95,8 +90,6 @@ class PurchaseNewPage extends StatelessWidget {
               ],
             ),
           ),
-
-          // ===== TABLE BODY =====
           Expanded(
             child: ListView(
               children: const [
@@ -105,8 +98,6 @@ class PurchaseNewPage extends StatelessWidget {
               ],
             ),
           ),
-
-          // ===== TOTAL BAR =====
           Container(
             color: Colors.grey.shade300,
             padding: const EdgeInsets.all(12),
@@ -134,11 +125,10 @@ class PurchaseNewPage extends StatelessWidget {
   }
 }
 
-/* ---------- TABLE WIDGETS ---------- */
-
 class _Header extends StatelessWidget {
   final String text;
   final int flex;
+
   const _Header(this.text, this.flex);
 
   @override

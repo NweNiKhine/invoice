@@ -14,9 +14,8 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  DateTime filterDate = DateTime.now(); // Default က ဒီနေ့ရက်စွဲ
+  DateTime filterDate = DateTime.now();
 
-  // PDF ထုတ်ပေးမည့် Function
   Future<void> _generatePdf(List<QueryDocumentSnapshot> docs, double totalAmt) async {
     final pdf = pw.Document();
     final dateStr = DateFormat('dd/MM/yyyy').format(filterDate);
@@ -28,7 +27,10 @@ class _ReportScreenState extends State<ReportScreen> {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text("Purchase Report", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                "Purchase Report",
+                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+              ),
               pw.SizedBox(height: 10),
               pw.Text("Date Filter: $dateStr"),
               pw.Divider(),
@@ -47,8 +49,10 @@ class _ReportScreenState extends State<ReportScreen> {
               pw.SizedBox(height: 20),
               pw.Align(
                 alignment: pw.Alignment.centerRight,
-                child: pw.Text("Grand Total: ${totalAmt.toStringAsFixed(2)} MMK",
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                child: pw.Text(
+                  "Grand Total: ${totalAmt.toStringAsFixed(2)} MMK",
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                ),
               ),
             ],
           );
@@ -56,16 +60,22 @@ class _ReportScreenState extends State<ReportScreen> {
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    String formattedFilterDate = DateFormat('dd/MM/yyyy').format(filterDate);
+    String formattedFilterDate =
+    DateFormat('dd/MM/yyyy').format(filterDate);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Purchase Report", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Purchase Report",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.purple,
         actions: [
           IconButton(
@@ -77,19 +87,22 @@ class _ReportScreenState extends State<ReportScreen> {
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2100),
               );
-              if (picked != null) setState(() => filterDate = picked);
+              if (picked != null) {
+                setState(() => filterDate = picked);
+              }
             },
           ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        // Firestore မှာ date string နဲ့သိမ်းထားရင် နှိုင်းယှဉ်ဖို့ filterDate ကို string ပြောင်းသုံးမယ်
         stream: FirebaseFirestore.instance
             .collection('purchases')
             .where('date', isEqualTo: formattedFilterDate)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           var docs = snapshot.data!.docs;
           double totalAmt = 0;
@@ -103,7 +116,6 @@ class _ReportScreenState extends State<ReportScreen> {
 
           return Column(
             children: [
-              // Summary Section
               Container(
                 padding: const EdgeInsets.all(16),
                 color: Colors.purple[50],
@@ -113,49 +125,64 @@ class _ReportScreenState extends State<ReportScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Selected Date: $formattedFilterDate", style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          "Selected Date: $formattedFilterDate",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         Text("Total Invoices: ${docs.length}"),
                       ],
                     ),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.picture_as_pdf),
                       label: const Text("Print PDF"),
-                      onPressed: docs.isEmpty ? null : () => _generatePdf(docs, totalAmt),
+                      onPressed: docs.isEmpty
+                          ? null
+                          : () => _generatePdf(docs, totalAmt),
                     ),
                   ],
                 ),
               ),
-
-              // Total Summary Cards
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 10),
                 child: Row(
                   children: [
-                    _infoCard("Total Qty", totalQty.toString(), Colors.orange),
-                    _infoCard("Total Amount", "${totalAmt.toStringAsFixed(0)} MMK", Colors.green),
+                    _infoCard(
+                        "Total Qty", totalQty.toString(), Colors.orange),
+                    _infoCard(
+                        "Total Amount",
+                        "${totalAmt.toStringAsFixed(0)} MMK",
+                        Colors.green),
                   ],
                 ),
               ),
-
-              // Detail Table
               Expanded(
                 child: docs.isEmpty
-                    ? const Center(child: Text("No data found for this date."))
+                    ? const Center(
+                  child: Text(
+                    "No data found for this date.",
+                  ),
+                )
                     : SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: SingleChildScrollView(
                     child: DataTable(
                       columns: const [
-                        DataColumn(label: Text('Invoice No')),
+                        DataColumn(
+                            label: Text('Invoice No')),
                         DataColumn(label: Text('Qty')),
                         DataColumn(label: Text('Amount')),
                       ],
                       rows: docs.map((doc) {
-                        var data = doc.data() as Map<String, dynamic>;
+                        var data =
+                        doc.data() as Map<String, dynamic>;
                         return DataRow(cells: [
-                          DataCell(Text(data['invoiceNo'] ?? "-")),
-                          DataCell(Text(data['totalQty'].toString())),
-                          DataCell(Text("${data['totalAmount']} MMK")),
+                          DataCell(
+                              Text(data['invoiceNo'] ?? "-")),
+                          DataCell(Text(
+                              data['totalQty'].toString())),
+                          DataCell(Text(
+                              "${data['totalAmount']} MMK")),
                         ]);
                       }).toList(),
                     ),
@@ -176,8 +203,18 @@ class _ReportScreenState extends State<ReportScreen> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+              Text(
+                title,
+                style: const TextStyle(
+                    fontSize: 12, color: Colors.grey),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color),
+              ),
             ],
           ),
         ),
